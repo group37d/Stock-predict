@@ -6,3 +6,4 @@ DataReader
 yfinance
 datetime
 streamlit
+pip install
