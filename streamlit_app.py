@@ -1,10 +1,3 @@
-# Scale the data
-from sklearn.preprocessing import MinMaxScaler
-
-scaler = MinMaxScaler(feature_range=(0,1))
-scaled_data = scaler.fit_transform(dataset)
-
-scaled_data
 # Create the training data set 
 # Create the scaled training data set
 train_data = scaled_data[0:int(training_data_len), :]
