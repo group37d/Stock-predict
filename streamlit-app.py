@@ -1,13 +1,5 @@
-# streamlit-app.py
-import numpy as np # linear algebra
-import pandas as pd # data processing, CSV file I/O 
-# Input data files are available in the read-only "../input/" directory
-# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory
-
-# import os
-# for dirname, _, filenames in os.walk('/kaggle/input'):
-#     for filename in filenames:
-#         print(os.path.join(dirname, filename))
+import pandas as pd
+import numpy as np
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -17,22 +9,26 @@ plt.style.use("fivethirtyeight")
 
 # For reading stock data from yahoo
 from pandas_datareader.data import DataReader
+import yfinance as yf
 
 # For time stamps
 from datetime import datetime
-#date time to get the date and time for the prediction
-# using data of apple google microsoft and amazon
+# The tech stocks we'll use for this analysis
 tech_list = ['AAPL', 'GOOG', 'MSFT', 'AMZN']
+
 # Set up End and Start times for data grab
+tech_list = ['AAPL', 'GOOG', 'MSFT', 'AMZN']
+
 end = datetime.now()
 start = datetime(end.year - 1, end.month, end.day)
-#end time is todays date and start time is from last
 
-#For loop for grabing yahoo finance data and setting as a dataframe
-for stock in tech_list:   
-    # Set DataFrame as the Stock Ticker
-    globals()[stock] = DataReader(stock, 'yahoo', start, end)
-    company_list = [AAPL, GOOG, MSFT, AMZN]
+for stock in tech_list:
+    globals()[stock] = yf.download(stock, start, end)
+
+# for company, company_name in zip(company_list, tech_list):
+#     company["company_name"] = company_name
+
+company_list = [AAPL, GOOG, MSFT, AMZN]
 company_name = ["APPLE", "GOOGLE", "MICROSOFT", "AMAZON"]
 
 for company, com_name in zip(company_list, company_name):
@@ -40,39 +36,52 @@ for company, com_name in zip(company_list, company_name):
     
 df = pd.concat(company_list, axis=0)
 df.tail(10)
+
+# Summary Stats
 AAPL.describe()
-# SUMMARY STATS FOR APPLE
-AMZN.describe()
-# SUMMARY STATS FOR AMAZON
-# APPLE INFO
+
+# General info
 AAPL.info()
-# HISTORICAL VIEW OF EACH COMPANY
-plt.figure(figsize=(12, 8))
+
+# Let's see a historical view of the closing price
+
+
+plt.figure(figsize=(15, 6))
 plt.subplots_adjust(top=1.25, bottom=1.2)
-plt.subplot(2, 2, 1)
-company['Adj Close'].plot()
-plt.ylabel('Adj Close')
-plt.xlabel(None)
-plt.title(f"{AMZN}")
+
 for i, company in enumerate(company_list, 1):
     plt.subplot(2, 2, i)
     company['Adj Close'].plot()
     plt.ylabel('Adj Close')
-    plt.xlabel('YEAR-MONTH')
-    plt.title(f"{tech_list[i - 1]}")
+    plt.xlabel(None)
+    plt.title(f"Closing Price of {tech_list[i - 1]}")
+    
+plt.tight_layout()
+
+# Now let's plot the total volume of stock being traded each day
+plt.figure(figsize=(15, 7))
+plt.subplots_adjust(top=1.25, bottom=1.2)
+
 for i, company in enumerate(company_list, 1):
     plt.subplot(2, 2, i)
     company['Volume'].plot()
-    plt.ylabel('VOLUME')
-    plt.xlabel('YEAR-MONTH')
-    plt.title(f"{tech_list[i - 1]}")
+    plt.ylabel('Volume')
+    plt.xlabel(None)
+    plt.title(f"Sales Volume for {tech_list[i - 1]}")
+    
+plt.tight_layout()
+
 ma_day = [10, 20, 50]
+
 for ma in ma_day:
     for company in company_list:
         column_name = f"MA for {ma} days"
         company[column_name] = company['Adj Close'].rolling(ma).mean()
-print(AMZN.columns)
-df.groupby("company_name").hist( bins=25, grid=False,figsize=(10, 10),color='#86bf91');
+
+# print(GOOG.columns)
+
+# df.groupby("company_name").hist(figsize=(12, 12));
+
 fig, axes = plt.subplots(nrows=2, ncols=2)
 fig.set_figheight(8)
 fig.set_figwidth(15)
@@ -90,16 +99,8 @@ AMZN[['Adj Close', 'MA for 10 days', 'MA for 20 days', 'MA for 50 days']].plot(a
 axes[1,1].set_title('AMAZON')
 
 fig.tight_layout()
-for company in company_list:
-    company['Daily Return'] = company['Adj Close'].pct_change()
-# Then we'll plot the daily return percentage
-fig, axes = plt.subplots(nrows=2, ncols=2)
-fig.set_figheight(8)
-fig.set_figwidth(15)
-#for apple
-AAPL['Daily Return'].plot(ax=axes[0,0], legend=True, linestyle='--', marker='o')
-axes[0,0].set_title('APPLE')
-#for all the companies
+
+# We'll use pct_change to find the percent change for each day
 for company in company_list:
     company['Daily Return'] = company['Adj Close'].pct_change()
 
@@ -121,41 +122,62 @@ AMZN['Daily Return'].plot(ax=axes[1,1], legend=True, linestyle='--', marker='o')
 axes[1,1].set_title('AMAZON')
 
 fig.tight_layout()
-# A kernel density estimate (KDE) plot is a method for visualizing the distribution of observations in a dataset,
-# analagous to a histogram. KDE represents the data using a continuous probability 
-# density curve in one or more dimensions
-plt.figure(figsize=(12, 12))
 
-# for i, company in enumerate(company_list, 1):
-#     plt.subplot(2, 2, i)
-#     sns.distplot(company['Daily Return'].dropna(), bins=100, color='purple')
-#     plt.ylabel('Daily Return')
-#     plt.title(f'{company_name[i - 1]}')
-# Could have also done:
-AAPL['Daily Return'].hist()
-plt.figure(figsize=(12, 12))
+plt.figure(figsize=(12, 7))
 
 for i, company in enumerate(company_list, 1):
     plt.subplot(2, 2, i)
-    sns.distplot(company['Daily Return'].dropna(), bins=100, color='purple')
+    company['Daily Return'].hist(bins=50)
     plt.ylabel('Daily Return')
     plt.title(f'{company_name[i - 1]}')
-# Could have also done:
-# AAPL['Daily Return'].hist()
+    
+plt.tight_layout()
+
 # Grab all the closing prices for the tech stock list into one DataFrame
 closing_df = DataReader(tech_list, 'yahoo', start, end)['Adj Close']
 
 # Let's take a quick look
-closing_df.head()
-# Now that we have all the closing prices, let's go ahead and get the daily return for all the stocks,
+closing_df.head() 
+
 # Make a new tech returns DataFrame
 tech_rets = closing_df.pct_change()
 tech_rets.head()
+
+# Comparing Google to itself should show a perfectly linear relationship
+sns.jointplot(x='GOOG', y='GOOG', data=tech_rets, kind='scatter', color='seagreen')
+
+# We'll use joinplot to compare the daily returns of Google and Microsoft
+sns.jointplot(x='GOOG', y='MSFT', data=tech_rets, kind='scatter')
+
+# We can simply call pairplot on our DataFrame for an automatic visual analysis 
+# of all the comparisons
+
+sns.pairplot(tech_rets, kind='reg')
+
+# Set up our figure by naming it returns_fig, call PairPLot on the DataFrame
+return_fig = sns.PairGrid(tech_rets.dropna())
+
+# Using map_upper we can specify what the upper triangle will look like.
+return_fig.map_upper(plt.scatter, color='purple')
+
+# We can also define the lower triangle in the figure, inclufing the plot type (kde) 
+# or the color map (BluePurple)
+return_fig.map_lower(sns.kdeplot, cmap='cool_d')
+
+# Finally we'll define the diagonal as a series of histogram plots of the daily return
+return_fig.map_diag(plt.hist, bins=30)
+
+# Let's go ahead and use sebron for a quick correlation plot for the daily returns
+sns.heatmap(tech_rets.corr(), annot=True, cmap='summer')
+
+sns.heatmap(closing_df.corr(), annot=True, cmap='summer')
+
+# Let's start by defining a new DataFrame as a clenaed version of the oriignal tech_rets DataFrame
 rets = tech_rets.dropna()
 
-area = np.pi*20
+area = np.pi * 20
 
-plt.figure(figsize=(12, 10))
+plt.figure(figsize=(10, 7))
 plt.scatter(rets.mean(), rets.std(), s=area)
 plt.xlabel('Expected return')
 plt.ylabel('Risk')
@@ -163,16 +185,18 @@ plt.ylabel('Risk')
 for label, x, y in zip(rets.columns, rets.mean(), rets.std()):
     plt.annotate(label, xy=(x, y), xytext=(50, 50), textcoords='offset points', ha='right', va='bottom', 
                  arrowprops=dict(arrowstyle='-', color='blue', connectionstyle='arc3,rad=-0.3'))
+# Get the stock quote
 df = DataReader('AAPL', data_source='yahoo', start='2012-01-01', end=datetime.now())
 # Show teh data
 df
-#if we want more data then change the start year 
-plt.figure(figsize=(16,8))
+
+plt.figure(figsize=(16,6))
 plt.title('Close Price History')
 plt.plot(df['Close'])
 plt.xlabel('Date', fontsize=18)
 plt.ylabel('Close Price USD ($)', fontsize=18)
 plt.show()
+
 # Create a new dataframe with only the 'Close column 
 data = df.filter(['Close'])
 # Convert the dataframe to a numpy array
@@ -181,13 +205,15 @@ dataset = data.values
 training_data_len = int(np.ceil( len(dataset) * .95 ))
 
 training_data_len
-#if we want more rows then change the start year 
+
+# Scale the data
 from sklearn.preprocessing import MinMaxScaler
 
 scaler = MinMaxScaler(feature_range=(0,1))
 scaled_data = scaler.fit_transform(dataset)
 
 scaled_data
+
 # Create the training data set 
 # Create the scaled training data set
 train_data = scaled_data[0:int(training_data_len), :]
@@ -209,6 +235,7 @@ x_train, y_train = np.array(x_train), np.array(y_train)
 # Reshape the data
 x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
 # x_train.shape
+
 from keras.models import Sequential
 from keras.layers import Dense, LSTM
 
@@ -224,9 +251,9 @@ model.compile(optimizer='adam', loss='mean_squared_error')
 
 # Train the model
 model.fit(x_train, y_train, batch_size=1, epochs=1)
+
 # Create the testing data set
-# Create a new array containing scaled values 
-import math
+# Create a new array containing scaled values from index 1543 to 2002 
 test_data = scaled_data[training_data_len - 60: , :]
 # Create the data sets x_test and y_test
 x_test = []
@@ -246,15 +273,14 @@ predictions = scaler.inverse_transform(predictions)
 
 # Get the root mean squared error (RMSE)
 rmse = np.sqrt(np.mean(((predictions - y_test) ** 2)))
-# mse = np.square(np.subtract(predictions,y_test)).mean()
-# rmse = math.sqrt(mse)
 rmse
+
 # Plot the data
 train = data[:training_data_len]
 valid = data[training_data_len:]
 valid['Predictions'] = predictions
 # Visualize the data
-plt.figure(figsize=(16,8))
+plt.figure(figsize=(16,6))
 plt.title('Model')
 plt.xlabel('Date', fontsize=18)
 plt.ylabel('Close Price USD ($)', fontsize=18)
@@ -262,5 +288,6 @@ plt.plot(train['Close'])
 plt.plot(valid[['Close', 'Predictions']])
 plt.legend(['Train', 'Val', 'Predictions'], loc='lower right')
 plt.show()
+
 # Show the valid and predicted prices
 valid
