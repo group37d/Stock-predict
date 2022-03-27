@@ -1,3 +1,11 @@
+# Create a new dataframe with only the 'Close column 
+data = df.filter(['Close'])
+# Convert the dataframe to a numpy array
+dataset = data.values
+# Get the number of rows to train the model on
+training_data_len = int(np.ceil( len(dataset) * .95 ))
+
+training_data_len
 # Create the training data set 
 # Create the scaled training data set
 train_data = scaled_data[0:int(training_data_len), :]
