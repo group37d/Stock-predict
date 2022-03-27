@@ -1,0 +1,10 @@
+pandas
+numpy
+matplotlib.pyplot
+seaborn
+DataReader
+yfinance
+datetime
+Sequential
+Dense, LSTM
+streamlit
