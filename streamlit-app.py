@@ -1,8 +1,3 @@
-# !pip install -q hvplot
-# !pip install --upgrade pandas
-# !pip install --upgrade pandas-datareader
-!pip install -q yfinance
-
 import pandas as pd
 import numpy as np
 
