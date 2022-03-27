@@ -2,8 +2,4 @@ pandas
 numpy
 matplotlib.pyplot
 seaborn
-DataReader
 yfinance
-datetime
-streamlit
-pip install
