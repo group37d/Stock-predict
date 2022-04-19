@@ -5,3 +5,4 @@ seaborn
 yfinance
 pandas_datareader
 sklearn 
+keras
