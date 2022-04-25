@@ -6,3 +6,4 @@ yfinance
 pandas_datareader
 sklearn 
 keras
+tensorflow
